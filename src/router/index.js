@@ -5,6 +5,7 @@ import UserLogin from '../views/UserLogin.vue';
 import AdminDashboard from '../views/AdminDashboard.vue';
 import UserDashboard from '../views/UserDashboard.vue';
 import Register from '../views/Register.vue';
+import WalletRecharge from '../views/WalletRecharge.vue';
 
 const routes = [
   { path: '/', name: 'HomeEnc', component: Home },
@@ -12,7 +13,8 @@ const routes = [
   { path: '/user-login', name: 'UserLogin', component: UserLogin },
   { path: '/register', name: 'Register', component: Register },
   { path: '/admin-dashboard', name: 'AdminDashboard', component: AdminDashboard, meta: { requiresAuth: true, role: 'admin' }},
-  { path: '/user-dashboard', name: 'UserDashboard', component: UserDashboard, meta: { requiresAuth: true, role: 'user' }}
+  { path: '/user-dashboard', name: 'UserDashboard', component: UserDashboard, meta: { requiresAuth: true, role: 'user' }},
+  { path: '/wallet-recharge', name: 'WalletRecharge', component: WalletRecharge, meta: { requiresAuth: true }}
 ];
 
 const router = createRouter({

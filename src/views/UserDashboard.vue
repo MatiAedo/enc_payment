@@ -2,6 +2,8 @@
   <div class="dashboard-container">
     <h1>Dashboard de Paciente</h1>
     <button @click="logout">Cerrar Sesión</button>
+    <p>Saldo de Wallet: {{ currentUser.wallet }} monedas</p>
+    <router-link to="/wallet-recharge">Recargar Wallet</router-link>
     <h2>Lista de Profesionales</h2>
     <ul>
       <li v-for="professional in professionals" :key="professional.username">
@@ -77,10 +79,22 @@ export default {
       let citas = JSON.parse(localStorage.getItem('citas')) || [];
       const index = citas.findIndex(c => c.id === cita.id);
       if (index !== -1) {
-        citas[index].estado = 'Pagada';
-        localStorage.setItem('citas', JSON.stringify(citas));
-        this.fetchMisCitas();
-        alert('Cita pagada con éxito');
+        if (this.currentUser.wallet >= 100) { // Supongamos que el costo de la cita es 100 monedas
+          this.currentUser.wallet -= 100;
+          citas[index].estado = 'Pagada';
+          localStorage.setItem('citas', JSON.stringify(citas));
+          this.fetchMisCitas();
+          let users = JSON.parse(localStorage.getItem('users')) || [];
+          const userIndex = users.findIndex(user => user.username === this.currentUser.username);
+          if (userIndex !== -1) {
+            users[userIndex].wallet = this.currentUser.wallet;
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+          }
+          alert('Cita pagada con éxito');
+        } else {
+          alert('Saldo insuficiente en el wallet');
+        }
       }
     },
     logout() {
@@ -94,5 +108,5 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos */
+/* Estilos  */
 </style>
