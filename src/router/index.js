@@ -6,6 +6,9 @@ import AdminDashboard from '../views/AdminDashboard.vue';
 import UserDashboard from '../views/UserDashboard.vue';
 import Register from '../views/Register.vue';
 import WalletRecharge from '../views/WalletRecharge.vue';
+import Payment from '../views/Payment.vue';
+import PaymentSuccess from '../views/PaymentSuccess.vue';
+import PaymentFailure from '../views/PaymentFailure.vue';
 
 const routes = [
   { path: '/', name: 'HomeEnc', component: Home },
@@ -14,7 +17,10 @@ const routes = [
   { path: '/register', name: 'Register', component: Register },
   { path: '/admin-dashboard', name: 'AdminDashboard', component: AdminDashboard, meta: { requiresAuth: true, role: 'admin' }},
   { path: '/user-dashboard', name: 'UserDashboard', component: UserDashboard, meta: { requiresAuth: true, role: 'user' }},
-  { path: '/wallet-recharge', name: 'WalletRecharge', component: WalletRecharge, meta: { requiresAuth: true }}
+  { path: '/wallet-recharge', name: 'WalletRecharge', component: WalletRecharge, meta: { requiresAuth: true }},
+  { path: '/payment/:id', name: 'Payment', component: Payment, meta: { requiresAuth: true }},
+  { path: '/payment-success', name: 'PaymentSuccess', component: PaymentSuccess, meta: { requiresAuth: true }},
+  { path: '/payment-failure', name: 'PaymentFailure', component: PaymentFailure, meta: { requiresAuth: true }}
 ];
 
 const router = createRouter({

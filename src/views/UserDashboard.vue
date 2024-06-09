@@ -14,8 +14,8 @@
     <h2>Mis Citas</h2>
     <ul>
       <li v-for="cita in misCitas" :key="cita.id">
-        Cita con {{ cita.professional.firstName }} {{ cita.professional.lastName }} - {{ cita.professional.email }} - Estado: {{ cita.estado }}
-        <button v-if="cita.estado === 'No pagada'" @click="pagarCita(cita)">Pagar</button>
+        Cita con {{ cita.professional.firstName }} {{ cita.professional.lastName }} - {{ cita.professional.email }} - Estado: {{ cita.estado }} - Valor: {{ cita.valor }} CLP
+        <router-link v-if="cita.estado !== 'Pagada'" :to="{ name: 'Payment', params: { id: cita.id } }">Pagar</router-link>
       </li>
     </ul>
   </div>
@@ -67,35 +67,14 @@ export default {
         id: Date.now(),
         paciente: this.currentUser,
         professional: professional,
-        estado: 'No pagada'
+        estado: 'No pagada',
+        valor: 10000 // Valor fijo de la cita
       };
 
       citas.push(nuevaCita);
       localStorage.setItem('citas', JSON.stringify(citas));
       this.fetchMisCitas();
       alert('Cita agendada con éxito');
-    },
-    pagarCita(cita) {
-      let citas = JSON.parse(localStorage.getItem('citas')) || [];
-      const index = citas.findIndex(c => c.id === cita.id);
-      if (index !== -1) {
-        if (this.currentUser.wallet >= 100) { // Supongamos que el costo de la cita es 100 monedas
-          this.currentUser.wallet -= 100;
-          citas[index].estado = 'Pagada';
-          localStorage.setItem('citas', JSON.stringify(citas));
-          this.fetchMisCitas();
-          let users = JSON.parse(localStorage.getItem('users')) || [];
-          const userIndex = users.findIndex(user => user.username === this.currentUser.username);
-          if (userIndex !== -1) {
-            users[userIndex].wallet = this.currentUser.wallet;
-            localStorage.setItem('users', JSON.stringify(users));
-            localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-          }
-          alert('Cita pagada con éxito');
-        } else {
-          alert('Saldo insuficiente en el wallet');
-        }
-      }
     },
     logout() {
       localStorage.removeItem('isAuthenticated');
@@ -108,5 +87,5 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos  */
+/* Estilos */
 </style>
