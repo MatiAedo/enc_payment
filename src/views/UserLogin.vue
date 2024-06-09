@@ -3,7 +3,7 @@
       <h1>Login de Usuario</h1>
       <form @submit.prevent="login">
         <div>
-          <label for="username">Usuario:</label>
+          <label for="username">Nombre de Usuario:</label>
           <input type="text" v-model="username" id="username" required />
         </div>
         <div>
@@ -12,6 +12,7 @@
         </div>
         <button type="submit">Login</button>
       </form>
+      <p>¿No tienes una cuenta? <button @click="goToRegister">Regístrate aquí</button></p>
     </div>
   </template>
   
@@ -26,15 +27,21 @@
     },
     methods: {
       login() {
-        // Simula autenticación exitosa
-        const isAuthenticated = this.username === 'user' && this.password === 'user'; // Simular autenticación básica
-        if (isAuthenticated) {
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        const user = users.find(
+          user => user.username === this.username && user.password === this.password && user.role === 'user'
+        );
+  
+        if (user) {
           localStorage.setItem('isAuthenticated', true);
           localStorage.setItem('userRole', 'user');
           this.$router.push({ name: 'UserDashboard' });
         } else {
-          alert('Credenciales inválidas');
+          alert('Credenciales inválidas o no eres usuario');
         }
+      },
+      goToRegister() {
+        this.$router.push({ name: 'Register', query: { role: 'user' } });
       }
     }
   };
