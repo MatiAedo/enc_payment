@@ -33,8 +33,10 @@ export default {
       );
 
       if (user) {
+        console.log('Admin login successful:', user);
         localStorage.setItem('isAuthenticated', true);
         localStorage.setItem('userRole', 'admin');
+        localStorage.setItem('currentUser', JSON.stringify(user));
         this.$router.push({ name: 'AdminDashboard' });
       } else {
         alert('Credenciales inválidas o no eres administrador');
@@ -48,5 +50,5 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos de tu elección */
+/* Estilos */
 </style>
