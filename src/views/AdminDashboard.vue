@@ -23,10 +23,33 @@
       </li>
     </ul>
 
+    <h2>Agendar Cita para Paciente No Registrado</h2>
+    <form @submit.prevent="agendarCitaNoRegistrada">
+      <div>
+        <label for="nombrePaciente">Nombre del Paciente:</label>
+        <input type="text" v-model="nuevoPaciente.nombre" id="nombrePaciente" required />
+      </div>
+      <div>
+        <label for="correoPaciente">Correo del Paciente:</label>
+        <input type="email" v-model="nuevoPaciente.correo" id="correoPaciente" required />
+      </div>
+      <div>
+        <label for="fechaCita">Fecha de Agendamiento:</label>
+        <input type="date" v-model="nuevoPaciente.fecha" :min="fechaMinima" required />
+      </div>
+      <div>
+        <label for="tipoAtencion">Tipo de Atención:</label>
+        <select v-model="nuevoPaciente.tipoAtencion" id="tipoAtencion" required>
+          <option v-for="atencion in misTiposAtencion" :key="atencion.id" :value="atencion">{{ atencion.nombre }} - {{ atencion.precio }} CLP</option>
+        </select>
+      </div>
+      <button type="submit">Agendar</button>
+    </form>
+
     <h2>Mis Citas</h2>
     <ul>
       <li v-for="cita in misCitas" :key="cita.id">
-        Cita con {{ cita.paciente.firstName }} {{ cita.paciente.lastName }} - {{ cita.paciente.email }} - Estado: {{ cita.estado }} - Servicio: {{ cita.servicio.nombre }} - Fecha: {{ cita.fecha }} - Fecha de Pago: {{ cita.fechaPago || 'N/A' }}
+        Cita con {{ cita.paciente.firstName || cita.paciente.nombre }} {{ cita.paciente.lastName || '' }} - {{ cita.paciente.email || cita.paciente.correo }} - Estado: {{ cita.estado }} - Servicio: {{ cita.servicio.nombre }} - Fecha: {{ cita.fecha }} - Fecha de Pago: {{ cita.fechaPago || 'N/A' }}
         <button v-if="cita.estado !== 'Pagada'" @click="marcarComoPagada(cita)">Marcar como pagada</button>
         <div v-if="cita.estado !== 'Pagada'">
           <p>Link de Pago: <a :href="generarLinkPago(cita)" target="_blank">{{ generarLinkPago(cita) }}</a></p>
@@ -38,6 +61,7 @@
 </template>
 
 <script>
+import moment from 'moment-timezone';
 
 export default {
   name: 'AdminDashboard',
@@ -49,7 +73,14 @@ export default {
         nombre: '',
         precio: 0
       },
-      currentUser: null
+      nuevoPaciente: {
+        nombre: '',
+        correo: '',
+        fecha: '',
+        tipoAtencion: null
+      },
+      currentUser: null,
+      fechaMinima: this.getFechaMinima()
     };
   },
   created() {
@@ -64,6 +95,11 @@ export default {
     this.fetchMisTiposAtencion();
   },
   methods: {
+    getFechaMinima() {
+      const hoy = moment().tz("America/Santiago");
+      hoy.add(1, 'days'); // Añadir un día para que la fecha mínima sea mañana
+      return hoy.format('YYYY-MM-DD'); // Formato YYYY-MM-DD
+    },
     fetchMisCitas() {
       let citas = JSON.parse(localStorage.getItem('citas')) || [];
       if (this.currentUser) {
@@ -93,6 +129,41 @@ export default {
       this.fetchMisTiposAtencion();
       alert('Tipo de atención creado con éxito');
     },
+    agendarCitaNoRegistrada() {
+      if (!this.nuevoPaciente.nombre || !this.nuevoPaciente.correo || !this.nuevoPaciente.fecha || !this.nuevoPaciente.tipoAtencion) {
+        alert('Por favor, completa todos los campos.');
+        return;
+      }
+
+      let citas = JSON.parse(localStorage.getItem('citas')) || [];
+
+      const nuevaCita = {
+        id: Date.now(),
+        paciente: {
+          nombre: this.nuevoPaciente.nombre,
+          correo: this.nuevoPaciente.correo
+        },
+        professional: this.currentUser,
+        servicio: this.nuevoPaciente.tipoAtencion,
+        estado: 'No pagada',
+        valor: this.nuevoPaciente.tipoAtencion.precio,
+        fecha: this.nuevoPaciente.fecha
+      };
+
+      citas.push(nuevaCita);
+      localStorage.setItem('citas', JSON.stringify(citas));
+      this.fetchMisCitas();
+      alert('Cita agendada con éxito');
+      this.resetForm();
+    },
+    resetForm() {
+      this.nuevoPaciente = {
+        nombre: '',
+        correo: '',
+        fecha: '',
+        tipoAtencion: null
+      };
+    },
     marcarComoPagada(cita) {
       let citas = JSON.parse(localStorage.getItem('citas')) || [];
       const citaIndex = citas.findIndex(c => c.id === cita.id);
@@ -110,8 +181,7 @@ export default {
     copiarLinkPago(link) {
       navigator.clipboard.writeText(link).then(() => {
         alert('Link de pago copiado al portapapeles');
-      }
-    );
+      });
     },
     logout() {
       localStorage.removeItem('isAuthenticated');
@@ -124,5 +194,5 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos */
+/* Estilos de tu elección */
 </style>
