@@ -2,10 +2,32 @@
   <div class="dashboard-container">
     <h1>Dashboard de Profesional</h1>
     <button @click="logout">Cerrar Sesión</button>
+
+    <h2>Crear Tipo de Atención</h2>
+    <form @submit.prevent="crearTipoAtencion">
+      <div>
+        <label for="nombre">Nombre del Servicio:</label>
+        <input type="text" v-model="nuevoTipoAtencion.nombre" id="nombre" required />
+      </div>
+      <div>
+        <label for="precio">Precio:</label>
+        <input type="number" v-model="nuevoTipoAtencion.precio" id="precio" required />
+      </div>
+      <button type="submit">Crear</button>
+    </form>
+
+    <h2>Mis Tipos de Atención</h2>
+    <ul>
+      <li v-for="atencion in misTiposAtencion" :key="atencion.id">
+        {{ atencion.nombre }} - {{ atencion.precio }} CLP
+      </li>
+    </ul>
+
     <h2>Mis Citas</h2>
     <ul>
       <li v-for="cita in misCitas" :key="cita.id">
-        Cita con {{ cita.paciente.firstName }} {{ cita.paciente.lastName }} - {{ cita.paciente.email }} - Estado: {{ cita.estado }}
+        Cita con {{ cita.paciente.firstName }} {{ cita.paciente.lastName }} - {{ cita.paciente.email }} - Estado: {{ cita.estado }} - Servicio: {{ cita.servicio.nombre }} - Fecha: {{ cita.fecha }} - Fecha de Pago: {{ cita.fechaPago || 'N/A' }}
+        <button v-if="cita.estado !== 'Pagada'" @click="marcarComoPagada(cita)">Marcar como pagada</button>
       </li>
     </ul>
   </div>
@@ -17,6 +39,11 @@ export default {
   data() {
     return {
       misCitas: [],
+      misTiposAtencion: [],
+      nuevoTipoAtencion: {
+        nombre: '',
+        precio: 0
+      },
       currentUser: null
     };
   },
@@ -29,6 +56,7 @@ export default {
     }
     console.log('currentUser:', this.currentUser);
     this.fetchMisCitas();
+    this.fetchMisTiposAtencion();
   },
   methods: {
     fetchMisCitas() {
@@ -37,6 +65,38 @@ export default {
         this.misCitas = citas.filter(cita => cita.professional.username === this.currentUser.username);
       } else {
         this.misCitas = [];
+      }
+    },
+    fetchMisTiposAtencion() {
+      let tiposAtencion = JSON.parse(localStorage.getItem('tiposAtencion')) || [];
+      if (this.currentUser) {
+        this.misTiposAtencion = tiposAtencion.filter(atencion => atencion.professional.username === this.currentUser.username);
+      } else {
+        this.misTiposAtencion = [];
+      }
+    },
+    crearTipoAtencion() {
+      let tiposAtencion = JSON.parse(localStorage.getItem('tiposAtencion')) || [];
+      const nuevoAtencion = {
+        id: Date.now(),
+        nombre: this.nuevoTipoAtencion.nombre,
+        precio: this.nuevoTipoAtencion.precio,
+        professional: this.currentUser
+      };
+      tiposAtencion.push(nuevoAtencion);
+      localStorage.setItem('tiposAtencion', JSON.stringify(tiposAtencion));
+      this.fetchMisTiposAtencion();
+      alert('Tipo de atención creado con éxito');
+    },
+    marcarComoPagada(cita) {
+      let citas = JSON.parse(localStorage.getItem('citas')) || [];
+      const citaIndex = citas.findIndex(c => c.id === cita.id);
+      if (citaIndex !== -1) {
+        citas[citaIndex].estado = 'Pagada';
+        citas[citaIndex].fechaPago = new Date().toISOString().slice(0, 10); // Registrar la fecha del pago
+        localStorage.setItem('citas', JSON.stringify(citas));
+        this.fetchMisCitas();
+        alert('Cita marcada como pagada');
       }
     },
     logout() {

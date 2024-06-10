@@ -78,6 +78,7 @@ export default {
         const citaIndex = citas.findIndex(cita => cita.id === this.cita.id);
         if (citaIndex !== -1) {
           citas[citaIndex].estado = 'Pagada';
+          citas[citaIndex].fechaPago = new Date().toISOString().slice(0, 10); // Registrar la fecha del pago
           localStorage.setItem('citas', JSON.stringify(citas));
         }
 
@@ -97,6 +98,7 @@ export default {
           const citaIndex = citas.findIndex(cita => cita.id === this.cita.id);
           if (citaIndex !== -1) {
             citas[citaIndex].estado = 'Pagada';
+            citas[citaIndex].fechaPago = new Date().toISOString().slice(0, 10); // Registrar la fecha del pago
             localStorage.setItem('citas', JSON.stringify(citas));
           }
           this.$router.push({ name: 'PaymentSuccess' });
