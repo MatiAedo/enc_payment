@@ -1,23 +1,34 @@
 <template>
   <div class="dashboard-container">
     <h1>Dashboard de Paciente</h1>
-    <button @click="logout">Cerrar Sesión</button>
-    <p>Saldo de Wallet: {{ currentUser.wallet }} monedas</p>
-    <router-link to="/wallet-recharge">Recargar Wallet</router-link>
-    <h2>Tipos de Atención Disponibles</h2>
-    <ul>
-      <li v-for="atencion in tiposAtencion" :key="atencion.id">
-        {{ atencion.nombre }} - {{ atencion.precio }} CLP - Profesional: {{ atencion.professional.firstName }} {{ atencion.professional.lastName }}
-        <button @click="abrirModalAgendar(atencion)">Agendar Cita</button>
-      </li>
-    </ul>
-    <h2>Mis Citas</h2>
-    <ul>
-      <li v-for="cita in misCitas" :key="cita.id">
-        Servicio: {{ cita.servicio.nombre }} - Profesional: {{ cita.servicio.professional.firstName }} {{ cita.servicio.professional.lastName }} - Estado: {{ cita.estado }} - Valor: {{ cita.valor }} CLP - Fecha: {{ cita.fecha }}
-        <router-link v-if="cita.estado !== 'Pagada'" :to="{ name: 'Payment', params: { id: cita.id } }">Pagar</router-link>
-      </li>
-    </ul>
+    <button @click="logout" class="logout-button">Cerrar Sesión</button>
+    <div class="card">
+      <h2>Saldo de Wallet</h2>
+      <p>Saldo actual: {{ currentUser.wallet }} monedas</p>
+      <router-link to="/wallet-recharge">Recargar Wallet</router-link>
+    </div>
+    <div class="card">
+      <h2>Tipos de Atención Disponibles</h2>
+      <ul>
+        <li v-for="atencion in tiposAtencion" :key="atencion.id" class="atencion-item">
+          {{ atencion.nombre }} - {{ atencion.precio }} CLP - Profesional: {{ atencion.professional.firstName }} {{ atencion.professional.lastName }}
+          <button @click="abrirModalAgendar(atencion)" class="agendar-button">Agendar Sesión</button>
+        </li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Mis Sesiones</h2>
+      <div class="citas-container">
+        <div v-for="cita in misCitas" :key="cita.id" class="cita-card">
+          <p><strong>Servicio:</strong> {{ cita.servicio.nombre }}</p>
+          <p><strong>Profesional:</strong> {{ cita.servicio.professional.firstName }} {{ cita.servicio.professional.lastName }}</p>
+          <p><strong>Estado:</strong> {{ cita.estado }}</p>
+          <p><strong>Valor:</strong> {{ cita.valor }} CLP</p>
+          <p><strong>Fecha de Agendamiento:</strong> {{ cita.fecha }}</p>
+          <router-link v-if="cita.estado !== 'Pagada'" :to="{ name: 'Payment', params: { id: cita.id } }" class="pagar-link">Pagar</router-link>
+        </div>
+      </div>
+    </div>
 
     <!-- Modal para seleccionar la fecha -->
     <div v-if="mostrarModal" class="modal">
@@ -25,11 +36,12 @@
         <span class="close" @click="cerrarModal">&times;</span>
         <h2>Seleccionar Fecha para {{ atencionSeleccionada.nombre }}</h2>
         <input type="date" v-model="fechaSeleccionada" :min="fechaMinima" />
-        <button @click="agendarCita">Agendar</button>
+        <button @click="agendarCita" class="modal-button">Agendar</button>
       </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import moment from 'moment-timezone';
@@ -131,6 +143,65 @@ export default {
 </script>
 
 <style scoped>
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f7f7f7;
+  padding: 20px;
+}
+
+.logout-button {
+  background-color: #f44336;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.logout-button:hover {
+  background-color: #d32f2f;
+}
+
+.card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+}
+
+.atencion-item,
+.cita-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.agendar-button,
+.pagar-link {
+  background-color: #4CAF50;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.agendar-button:hover,
+.pagar-link:hover {
+  background-color: #45a049;
+}
+
 .modal {
   display: block;
   position: fixed;
@@ -150,6 +221,8 @@ export default {
   padding: 20px;
   border: 1px solid #888;
   width: 80%;
+  max-width: 500px;
+  border-radius: 8px;
 }
 
 .close {
@@ -164,5 +237,38 @@ export default {
   color: black;
   text-decoration: none;
   cursor: pointer;
+}
+
+.modal-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-button:hover {
+  background-color: #45a049;
+}
+
+.citas-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.cita-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 </style>

@@ -1,52 +1,49 @@
 <template>
   <div class="payment-container">
-    <h1>Pago de Cita</h1>
+    <h1>Pago de Sesión</h1>
     
     <!-- Detalles de la Cita -->
-    <div v-if="cita">
+    <div v-if="cita" class="cita-details">
       <p><strong>Nombre del Paciente:</strong> {{ cita.paciente.firstName }} {{ cita.paciente.lastName }}</p>
       <p><strong>Nombre del Servicio:</strong> {{ cita.servicio.nombre }}</p>
       <p><strong>Fecha de Agendamiento:</strong> {{ cita.fecha }}</p>
+      <p><strong>Valor de la sesión:</strong> {{ cita.valor }} CLP</p>
     </div>
-    
-    <p v-if="isAuthenticated && currentUser">Saldo actual: {{ currentUser.wallet }} monedas</p>
-    <p>Valor de la cita: {{ cita.valor }} CLP</p>
 
     <h2>Seleccionar método de pago</h2>
-    <select v-model="selectedMethod">
-      <option value="creditCard">Tarjeta de Crédito/Débito</option>
-      <option value="dolares">Pagar en Dólares</option>
-      <option v-if="isAuthenticated && currentUser && userRole === 'user'" value="wallet">Wallet</option>
-    </select>
+    <div class="payment-methods">
+      <div class="payment-method" v-if="isAuthenticated && currentUser && userRole === 'user'">
+        <p>Saldo actual: {{ currentUser.wallet }} monedas</p>
+        <button @click="pagarCitaConWallet" class="payment-button">Pagar con Wallet</button>
+      </div>
 
-    <div v-if="selectedMethod === 'wallet' && isAuthenticated && currentUser && userRole === 'user'">
-      <button @click="pagarCitaConWallet">Pagar con Wallet</button>
-    </div>
+      <div class="payment-method">
+        <form @submit.prevent="pagarCitaConTarjeta" class="form">
+          <div class="form-group">
+            <label for="cardNumber">Número de Tarjeta:</label>
+            <input type="text" v-model="cardNumber" id="cardNumber" required />
+          </div>
+          <div class="form-group">
+            <label for="expiryDate">Fecha de Expiración:</label>
+            <input type="text" v-model="expiryDate" id="expiryDate" required />
+          </div>
+          <div class="form-group">
+            <label for="cvv">CVV:</label>
+            <input type="text" v-model="cvv" id="cvv" required />
+          </div>
+          <button type="submit" class="form-button">Pagar con Tarjeta</button>
+        </form>
+      </div>
 
-    <div v-if="selectedMethod === 'creditCard'">
-      <form @submit.prevent="pagarCitaConTarjeta">
-        <div>
-          <label for="cardNumber">Número de Tarjeta:</label>
-          <input type="text" v-model="cardNumber" id="cardNumber" required />
-        </div>
-        <div>
-          <label for="expiryDate">Fecha de Expiración:</label>
-          <input type="text" v-model="expiryDate" id="expiryDate" required />
-        </div>
-        <div>
-          <label for="cvv">CVV:</label>
-          <input type="text" v-model="cvv" id="cvv" required />
-        </div>
-        <button type="submit">Pagar con Tarjeta</button>
-      </form>
-    </div>
-
-    <div v-if="selectedMethod === 'dolares'">
-      <p>Precio en dólares: {{ precioEnDolares.toFixed(2) }} USD (incluye 6% de comisión)</p>
-      <button @click="pagarCitaEnDolares">Pagar en Dólares</button>
+      <div class="payment-method">
+        <p>Precio en dólares: {{ precioEnDolares.toFixed(2) }} USD (incluye 6% de comisión)</p>
+        <button @click="pagarCitaEnDolares" class="payment-button">Pagar en Dólares</button>
+      </div>
     </div>
   </div>
 </template>
+
+
 
 <script>
 import axios from 'axios';
@@ -162,5 +159,93 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos */
+.payment-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f7f7f7;
+  padding: 20px;
+}
+
+.cita-details {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+}
+
+.payment-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.payment-method {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.form-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.form-button:hover {
+  background-color: #45a049;
+}
+
+.payment-button {
+  background-color: #007BFF;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.payment-button:hover {
+  background-color: #0056b3;
+}
 </style>
+
