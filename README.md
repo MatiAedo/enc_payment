@@ -11,7 +11,7 @@ En cuanto a las funcionalidades:
 - El link de pago permitirá el pago con Wallet siempre y cuando se esté logueado como paciente, en caso contrario se podrá realizar el pago con tarjeta o en otra moneda.
 - Tanto paciente como profesional pueden agendar sesiones, pero si es agendada por el profesional solo será posible el pago por link, dado que no se reflejará en la vista del paciente si tienen usuario creado
 
-También se hosteó en Vercel: [Link](https://enc-payment-c5r30ftig-matias-projects-3e64d732.vercel.app)
+También se hosteó en Vercel: [Link](https://enc-payment.vercel.app/)
 
 Instrucciones para ejecución en local:
 
