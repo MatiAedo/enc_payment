@@ -28,12 +28,17 @@
       <li v-for="cita in misCitas" :key="cita.id">
         Cita con {{ cita.paciente.firstName }} {{ cita.paciente.lastName }} - {{ cita.paciente.email }} - Estado: {{ cita.estado }} - Servicio: {{ cita.servicio.nombre }} - Fecha: {{ cita.fecha }} - Fecha de Pago: {{ cita.fechaPago || 'N/A' }}
         <button v-if="cita.estado !== 'Pagada'" @click="marcarComoPagada(cita)">Marcar como pagada</button>
+        <div v-if="cita.estado !== 'Pagada'">
+          <p>Link de Pago: <a :href="generarLinkPago(cita)" target="_blank">{{ generarLinkPago(cita) }}</a></p>
+          <button @click="copiarLinkPago(generarLinkPago(cita))">Copiar Link de Pago</button>
+        </div>
       </li>
     </ul>
   </div>
 </template>
 
 <script>
+
 export default {
   name: 'AdminDashboard',
   data() {
@@ -98,6 +103,15 @@ export default {
         this.fetchMisCitas();
         alert('Cita marcada como pagada');
       }
+    },
+    generarLinkPago(cita) {
+      return `${window.location.origin}/payment/${cita.id}`;
+    },
+    copiarLinkPago(link) {
+      navigator.clipboard.writeText(link).then(() => {
+        alert('Link de pago copiado al portapapeles');
+      }
+    );
     },
     logout() {
       localStorage.removeItem('isAuthenticated');

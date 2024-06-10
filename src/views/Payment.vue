@@ -1,17 +1,25 @@
 <template>
   <div class="payment-container">
     <h1>Pago de Cita</h1>
-    <p>Saldo actual: {{ currentUser.wallet }} monedas</p>
+    
+    <!-- Detalles de la Cita -->
+    <div v-if="cita">
+      <p><strong>Nombre del Paciente:</strong> {{ cita.paciente.firstName }} {{ cita.paciente.lastName }}</p>
+      <p><strong>Nombre del Servicio:</strong> {{ cita.servicio.nombre }}</p>
+      <p><strong>Fecha de Agendamiento:</strong> {{ cita.fecha }}</p>
+    </div>
+    
+    <p v-if="isAuthenticated && currentUser">Saldo actual: {{ currentUser.wallet }} monedas</p>
     <p>Valor de la cita: {{ cita.valor }} CLP</p>
 
     <h2>Seleccionar método de pago</h2>
     <select v-model="selectedMethod">
-      <option value="wallet">Wallet</option>
       <option value="creditCard">Tarjeta de Crédito/Débito</option>
       <option value="dolares">Pagar en Dólares</option>
+      <option v-if="isAuthenticated && currentUser && userRole === 'user'" value="wallet">Wallet</option>
     </select>
 
-    <div v-if="selectedMethod === 'wallet'">
+    <div v-if="selectedMethod === 'wallet' && isAuthenticated && currentUser && userRole === 'user'">
       <button @click="pagarCitaConWallet">Pagar con Wallet</button>
     </div>
 
@@ -48,8 +56,10 @@ export default {
   data() {
     return {
       currentUser: null,
+      isAuthenticated: false,
+      userRole: null,
       cita: null,
-      selectedMethod: 'wallet',
+      selectedMethod: 'creditCard',
       cardNumber: '',
       expiryDate: '',
       cvv: '',
@@ -58,11 +68,14 @@ export default {
     };
   },
   created() {
-    this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!this.currentUser) {
-      console.error('currentUser is null. Redirecting to HomeEnc.');
-      this.$router.push({ name: 'HomeEnc' });
-      return;
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const userRole = localStorage.getItem('userRole');
+
+    if (isAuthenticated && currentUser) {
+      this.isAuthenticated = true;
+      this.currentUser = currentUser;
+      this.userRole = userRole;
     }
 
     const citas = JSON.parse(localStorage.getItem('citas')) || [];
