@@ -194,5 +194,5 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos de tu elección */
+/* Estilos */
 </style>
