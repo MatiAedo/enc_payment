@@ -8,6 +8,7 @@
     <select v-model="selectedMethod">
       <option value="wallet">Wallet</option>
       <option value="creditCard">Tarjeta de Crédito/Débito</option>
+      <option value="dolares">Pagar en Dólares</option>
     </select>
 
     <div v-if="selectedMethod === 'wallet'">
@@ -31,10 +32,17 @@
         <button type="submit">Pagar con Tarjeta</button>
       </form>
     </div>
+
+    <div v-if="selectedMethod === 'dolares'">
+      <p>Precio en dólares: {{ precioEnDolares.toFixed(2) }} USD (incluye 6% de comisión)</p>
+      <button @click="pagarCitaEnDolares">Pagar en Dólares</button>
+    </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'PaymentEnc',
   data() {
@@ -44,7 +52,9 @@ export default {
       selectedMethod: 'wallet',
       cardNumber: '',
       expiryDate: '',
-      cvv: ''
+      cvv: '',
+      tipoCambioDolar: null,
+      precioEnDolares: 0
     };
   },
   created() {
@@ -60,9 +70,22 @@ export default {
     if (!this.cita) {
       console.error('Cita not found. Redirecting to UserDashboard.');
       this.$router.push({ name: 'UserDashboard' });
+    } else {
+      this.obtenerTipoCambioDolar();
     }
   },
   methods: {
+    obtenerTipoCambioDolar() {
+      axios.get('https://api.exchangerate-api.com/v4/latest/USD')
+        .then(response => {
+          const tipoCambio = response.data.rates.CLP;
+          this.tipoCambioDolar = tipoCambio;
+          this.precioEnDolares = (this.cita.valor / tipoCambio) * 1.06; // Incluye 6% de comisión
+        })
+        .catch(error => {
+          console.error('Error al obtener el tipo de cambio del dólar:', error);
+        });
+    },
     pagarCitaConWallet() {
       if (this.currentUser.wallet >= this.cita.valor) {
         this.currentUser.wallet -= this.cita.valor;
@@ -106,6 +129,16 @@ export default {
       } else {
         this.$router.push({ name: 'PaymentFailure' });
       }
+    },
+    pagarCitaEnDolares() {
+      let citas = JSON.parse(localStorage.getItem('citas')) || [];
+      const citaIndex = citas.findIndex(c => c.id === this.cita.id);
+      if (citaIndex !== -1) {
+        citas[citaIndex].estado = 'Pagada';
+        citas[citaIndex].fechaPago = new Date().toISOString().slice(0, 10); // Registrar la fecha del pago
+        localStorage.setItem('citas', JSON.stringify(citas));
+      }
+      this.$router.push({ name: 'PaymentSuccess' });
     },
     validarTarjeta() {
       // Simulación simple de validación de tarjeta
