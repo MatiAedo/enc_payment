@@ -1,6 +1,6 @@
 <template>
   <div class="register-container">
-    <h1>Registro de Usuarios</h1>
+    <h1>Registro como {{ roleText }}</h1>
     <form @submit.prevent="register">
       <div>
         <label for="firstName">Nombre:</label>
@@ -11,12 +11,8 @@
         <input type="text" v-model="lastName" id="lastName" required />
       </div>
       <div>
-        <label for="email">Correo:</label>
+        <label for="email">Correo Electrónico:</label>
         <input type="email" v-model="email" id="email" required />
-      </div>
-      <div>
-        <label for="birthDate">Fecha de Nacimiento:</label>
-        <input type="date" v-model="birthDate" id="birthDate" required />
       </div>
       <div>
         <label for="username">Nombre de Usuario:</label>
@@ -30,14 +26,7 @@
         <label for="confirmPassword">Confirmar Contraseña:</label>
         <input type="password" v-model="confirmPassword" id="confirmPassword" required />
       </div>
-      <div>
-        <label for="role">Rol:</label>
-        <select v-model="role" id="role" required>
-          <option value="admin">Profesional</option>
-          <option value="user">Paciente</option>
-        </select>
-      </div>
-      <button type="submit">Registrar</button>
+      <button type="submit">Registrarse</button>
     </form>
   </div>
 </template>
@@ -50,36 +39,38 @@ export default {
       firstName: '',
       lastName: '',
       email: '',
-      birthDate: '',
       username: '',
       password: '',
       confirmPassword: '',
-      role: this.$route.query.role || 'user' // Preseleccionar el rol basado en la query de la ruta
+      role: this.$route.query.role // Obtener el rol desde los parámetros de la ruta
     };
+  },
+  computed: {
+    roleText() {
+      return this.role === 'admin' ? 'Profesional' : 'Paciente';
+    }
   },
   methods: {
     register() {
       if (this.password !== this.confirmPassword) {
-        alert('Las contraseñas no coinciden');
+        alert('Las contraseñas no coinciden.');
         return;
       }
 
+      let users = JSON.parse(localStorage.getItem('users')) || [];
       const newUser = {
         firstName: this.firstName,
         lastName: this.lastName,
         email: this.email,
-        birthDate: this.birthDate,
         username: this.username,
         password: this.password,
         role: this.role,
-        wallet: 0 // Saldo inicial del wallet
+        wallet: 0 // Inicializar el wallet con 0 monedas
       };
 
-      let users = JSON.parse(localStorage.getItem('users')) || [];
       users.push(newUser);
       localStorage.setItem('users', JSON.stringify(users));
-
-      alert('Usuario registrado con éxito');
+      alert('Registro exitoso');
       this.$router.push({ name: 'HomeEnc' });
     }
   }
@@ -87,5 +78,5 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos */
+/* Estilos de tu elección */
 </style>
